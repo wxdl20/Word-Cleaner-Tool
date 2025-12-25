@@ -1,15 +1,14 @@
-name: Build EXE
+name: Build Windows EXE
 
-on:
-  push:
-    branches: [ "main" ]
+on: workflow_dispatch  # 允许你手动点击按钮触发，方便测试
 
 jobs:
   build:
-    runs-on: windows-latest  # 指定在 Windows 服务器上运行
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -17,17 +16,23 @@ jobs:
         python-version: '3.10'
 
     - name: Install dependencies
+      # 这里一次性安装所有可能缺少的库
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller python-docx
 
-    - name: Build EXE
+    - name: Verify file exists
+      # 这一步是为了帮你调试，列出当前文件
       run: |
-        # 这里执行打包命令
-        pyinstaller -F -w app.py
+        ls
+    
+    - name: Build EXE
+      # 注意：确保你的python文件名是 app.py。如果是别的，请修改下面这一行
+      run: |
+        pyinstaller -F -w app.py --name "WordCleaner"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: WordFilter_Windows_EXE  # 下载时的压缩包名字
-        path: dist/*.exe              # 上传 dist 目录下的 exe 文件
+        name: WordCleaner_Tool
+        path: dist/*.exe
